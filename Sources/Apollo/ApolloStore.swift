@@ -106,8 +106,8 @@ public final class ApolloStore {
       let dependencyTracker = GraphQLDependencyTracker()
       
       return try transaction.execute(selections: Query.Data.selections, onObjectWithKey: rootKey(forOperation: query), variables: query.variables, accumulator: zip(mapper, dependencyTracker))
-    }.map { (data: Query.Data, dependentKeys: Set<CacheKey>) in
-      GraphQLResult(data: data, errors: nil, dependentKeys: dependentKeys)
+        }.map { (data: Query.Data, dependentKeys: Set<CacheKey>) in
+            GraphQLResult(data: data, errors: nil, dependentKeys: dependentKeys, responseHeaders: nil)
     }
   }
   

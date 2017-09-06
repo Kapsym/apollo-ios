@@ -2,10 +2,12 @@
 public final class GraphQLResponse<Operation: GraphQLOperation> {
   public let operation: Operation
   public let body: JSONObject
+  public let responseHeaders: [AnyHashable: Any]
 
-  public init(operation: Operation, body: JSONObject) {
+  public init(operation: Operation, body: JSONObject, responseHeaders: [AnyHashable: Any]) {
     self.operation = operation
     self.body = body
+    self.responseHeaders = responseHeaders
   }
 
   func parseResult(cacheKeyForObject: CacheKeyForObject? = nil) throws -> Promise<(GraphQLResult<Operation.Data>, RecordSet?)>  {
@@ -31,10 +33,10 @@ public final class GraphQLResponse<Operation: GraphQLOperation> {
       return firstly {
         try executor.execute(selections: Operation.Data.selections, on: dataEntry, withKey: rootKey(forOperation: operation), variables: operation.variables, accumulator: zip(mapper, normalizer, dependencyTracker))
       }.map { (data, records, dependentKeys) in
-        (GraphQLResult(data: data, errors: errors, dependentKeys: dependentKeys), records)
+        (GraphQLResult(data: data, errors: errors, dependentKeys: dependentKeys, responseHeaders: self.responseHeaders), records)
       }
     } else {
-      return Promise(fulfilled: (GraphQLResult(data: nil, errors: errors, dependentKeys: nil), nil))
+        return Promise(fulfilled: (GraphQLResult(data: nil, errors: errors, dependentKeys: nil, responseHeaders: nil), nil))
     }
   }
 }
